@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>social suicide wheel of fortune</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 20px;
+
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+            transform: rotate(0deg);
+            transition: transform 5s cubic-bezier(0.1, 0.6, 0.3, 1);
+            background-color: black;
+        }
+
+        .wheel.spinning {
+            /* Class added by JavaScript */
+        }
+
+        .segment {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform-origin: 50% 50%;
+        display: flex;
+        justify-content: center; /* Center the text container */
+        align-items: center; /* Center the text container */
+        color: #fff;
+        font-weight: bold;
+        text-align: center;
+        /* No padding needed directly on the segment anymore */
+        box-sizing: border-box;
+    }
+
+    .segment-text {
+        position: absolute;
+        color: #000000;
+        font-weight: bold;
+        text-align: center;
+        transform-origin: center center;
+        /* Add these lines to control font and box size */
+        font-size: .8em; /* Adjust this value to make the font smaller (e.g., 0.8em, 0.9em) */
+        padding: 5px 10px; /* Add padding to create some space around the text */
+ width: 40px;
+ height: 40px;
+        box-sizing: border-box; /* Ensure padding doesn't increase the overall size */
+        white-space: nowrap; /* Prevent text from wrapping */
+
+    }
+    .segment span {
+        /* Rotation set by JavaScript */
+    }
+
+
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid #333;
+            transform: translate(-50%, -50%) rotate(0deg);
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .spin-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .spin-button:hover {
+            background-color: #000000;
+        }
+
+        .result-display {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wheel-container">
+            <div class="wheel">
+                    </div>
+            <div class="spinner"></div>
+        </div>
+        <div class="controls">
+            <button class="spin-button">Spin</button>
+            <div class="result-display"></div>
+        </div>
+    </div>
+    <script>
+        const wheel = document.querySelector('.wheel');
+        const spinButton = document.querySelector('.spin-button');
+        const resultDisplay = document.querySelector('.result-display');
+        const options = ["        ‎ ‎ ‎ nitro trial", "    ‎ ‎  ‎ ‎     (kicked)", "     ‎ ‎ ‎    ‎     try again", "   ‎ ‎ ‎        mod for a day", "     ‎ ‎   ‎ ‎     game code", "     ‎ ‎  ‎         special role"];
+        const numSegments = options.length;
+        const segmentDeg = 360 / numSegments;
+        const wheelRadius = 120; // Radius for text positioning
+        const textOffsetPercentage = 1; // Percentage of wheelRadius for text distance
+    
+        let rotation = 0;
+        let spinning = false;
+    
+        function getRandomColor() {
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}, 70%, 60%)`;
+        }
+    
+        function createSegments() {
+            wheel.innerHTML = '';
+            for (let i = 0; i < numSegments; i++) {
+                const segment = document.createElement('div');
+                segment.classList.add('segment');
+                const segmentRotation = i * segmentDeg;
+                segment.style.transform = `rotate(${segmentRotation}deg)`;
+                segment.style.backgroundColor = getRandomColor();
+                segment.style.clipPath = `polygon(50% 50%, 50% 0, 100% 0, 50% 50%)`;
+                segment.style.position = 'absolute';
+                segment.style.width = '100%';
+                segment.style.height = '100%';
+    
+                const textContainer = document.createElement('div');
+                textContainer.classList.add('segment-text');
+                textContainer.textContent = options[i];
+                textContainer.style.position = 'absolute';
+                textContainer.style.left = '50%';
+                textContainer.style.top = '50%';
+                const outwardTranslation = -wheelRadius * textOffsetPercentage;
+                textContainer.style.transform = `translate(-50%, -50%) translateY(${outwardTranslation}px) rotate(${segmentDeg / 2}deg)`;
+                textContainer.style.transformOrigin = 'center center';
+    
+                segment.appendChild(textContainer);
+                wheel.appendChild(segment);
+            }
+        }
+    
+        function spinWheel() {
+            if (spinning) return;
+            spinning = true;
+            resultDisplay.textContent = '';
+            spinButton.disabled = true;
+    
+            const randomSpin = 360 * 5 + Math.random() * 360;
+            rotation += randomSpin;
+    
+            wheel.classList.add('spinning');
+            wheel.style.transform = `rotate(${rotation}deg)`;
+    
+            setTimeout(() => {
+                wheel.classList.remove('spinning');
+                wheel.style.transition = 'none';
+                const actualRotation = rotation % 360;
+                const winningSegmentIndex = Math.floor((360 - actualRotation) / segmentDeg) % numSegments;
+                const winnerText = options[winningSegmentIndex];
+                resultDisplay.textContent = `You landed on: ${winnerText}`;
+                spinning = false;
+                spinButton.disabled = false;
+                wheel.style.transition = 'transform 0.3s ease-in-out';
+                wheel.style.transform = `rotate(${actualRotation}deg)`;
+                rotation = actualRotation;
+            }, 5000);
+        }
+    
+        spinButton.addEventListener('click', spinWheel);
+    
+        createSegments(); // Call this when the page loads
+    </script>
+</body>
+</html>
